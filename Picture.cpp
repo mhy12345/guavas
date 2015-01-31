@@ -46,29 +46,38 @@ void Picture::AttachFromFile(const char * file_name)
     }
     fgets(note,NOTE_LEN*sizeof(char),infile);
     fscanf(infile,"%d %d\n",&width,&height);
+    int maxval;
+    fscanf(infile,"%d",&maxval);
+    if (maxval!=255)
+    {
+        fprintf(stderr,"Wrong File Format!\n");
+        exit(0);
+    }
     for (int i=0; i<height; i++)
         for (int j=0; j<width; j++)
-            fscanf(infile,"%d %d %d",&b[i][j],&r[i][j],&g[i][j]);
+            fscanf(infile,"%d %d %d",&r[i][j],&g[i][j],&b[i][j]);
     fclose(infile);
 }
 
-void Picture::PrintIntoFile(const char * file_name)
+void Picture::PrintIntoFile(const char * file_name)const
 {
     FILE *outfile=fopen(file_name,"w");
     fprintf(outfile,"P3\n");
     fprintf(outfile,"%s",note);
+    fprintf(outfile,"%d %d\n",width,height);
+    fprintf(outfile,"255\n");
     for (int i=0;i<height;i++)
     {
         for (int j=0;j<width;j++)
         {
-            fprintf(outfile,"%d %d %d  ",b[i][j],r[i][j],g[i][j]);
+            fprintf(outfile,"%d %d %d  ",r[i][j],g[i][j],b[i][j]);
         }
         fprintf(outfile,"\n");
     }
     fclose(outfile);
 }
 #ifdef WIN32
-void Picture::Paint(HDC hdc,int ws=0,int hs=0)
+void Picture::Paint(HDC hdc,int ws=0,int hs=0)const
 {
     ws=10+((width+10)*ws);
     hs=10+((height+10)*hs);
@@ -153,15 +162,15 @@ void Picture::ContrastIncrease()
         }
     }
 }
-int Picture::GetWidth()
+int Picture::GetWidth()const
 {
     return width;
 }
-int Picture::GetHeight()
+int Picture::GetHeight()const
 {
     return height;
 }
-int Picture::GetPixel(int x,int y)
+int Picture::GetPixel(int x,int y)const
 {
     return (r[x][y]<<16)+(g[x][y]<<8)+b[x][y];
 }
