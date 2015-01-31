@@ -9,9 +9,11 @@ private:
     int height,width;
     int brg[3][maxw][maxh];
     int *b[maxw],*r[maxw],*g[maxw];
+    char *note;
 public:
     Picture();
     Picture(const Picture& picb);
+    ~Picture();
     void Init(const Picture &picb);
     void AttachFromFile(const char * file_name);
     void PrintIntoFile(const char * file_name);

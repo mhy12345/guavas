@@ -1,25 +1,14 @@
-#ifndef STDAFX_H
-#define STDAFX_H
-
-#include <bits/stdc++.h>
-
-using namespace std;
-
-#ifndef CONST_DEFINATION
-#define CONST_DEFINATION
-#define PI 3.1415926535384
-const int mov[9][2]= {{0,1},{1,0},{0,-1},{-1,0},{1,1},{-1,-1},{-1,1},{1,-1},{0,0}};
-const int maxpic=10;
-#endif
-
-double Gaussian_Distribution_h(double x);
-double Gaussian_Distribution_g(double x);
-double Gaussian_Distribution_f(double x);
-
-#ifdef WIN32
-#include <windows.h>
-#else
-#include <unistd.h>
-#endif
-
-#endif
+#include "stdafx.h"
+double Gaussian_Distribution_f(double x)
+{
+    return 1.0/(sqrt(2*PI))*exp(-x*x/2);
+}
+double Gaussian_Distribution_g(double x)
+{
+    if (x>0)return 0.398942280407134-Gaussian_Distribution_f(x);
+    else return Gaussian_Distribution_f(x)-0.398942280407134;
+}
+double Gaussian_Distribution_h(double x)
+{
+    return Gaussian_Distribution_g((x-128)/128)*815.4343586563920+128;
+}

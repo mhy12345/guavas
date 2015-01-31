@@ -25,6 +25,7 @@ int WINAPI WinMain (HINSTANCE hThisInstance,
     WNDCLASSEX wincl;        /* Data structure for the windowclass */
 
     Pic[++toppic].AttachFromFile("test1.ppm");
+    Pic[0].PrintIntoFile("test2.ppm");
     /* The Window structure */
     wincl.hInstance = hThisInstance;
     wincl.lpszClassName = szClassName;

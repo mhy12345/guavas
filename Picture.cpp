@@ -9,10 +9,16 @@ Picture::Picture()
         r[i]=brg[1][i];
         g[i]=brg[2][i];
     }
+    note=new char[NOTE_LEN];
 }
 Picture::Picture(const Picture &picb)
 {
     Init(picb);
+    note=new char[NOTE_LEN];
+}
+Picture::~Picture()
+{
+    delete[] note;
 }
 void Picture::Init(const Picture &picb)
 {
@@ -32,20 +38,35 @@ void Picture::AttachFromFile(const char * file_name)
         fprintf(stderr,"Cannot Open %s.\n",file_name);
         exit(0);
     }
-    char str[300];
-    fgets(str,sizeof(str),infile);
-    if (!strstr(str,"P3"))
+    fgets(note,NOTE_LEN*sizeof(char),infile);
+    if (!strstr(note,"P3"))
     {
         fprintf(stderr,"Wrong File!\n");
         exit(0);
     }
-    fgets(str,sizeof(str),infile);
+    fgets(note,NOTE_LEN*sizeof(char),infile);
     fscanf(infile,"%d %d\n",&width,&height);
     for (int i=0; i<height; i++)
         for (int j=0; j<width; j++)
             fscanf(infile,"%d %d %d",&b[i][j],&r[i][j],&g[i][j]);
+    fclose(infile);
 }
 
+void Picture::PrintIntoFile(const char * file_name)
+{
+    FILE *outfile=fopen(file_name,"w");
+    fprintf(outfile,"P3\n");
+    fprintf(outfile,"%s",note);
+    for (int i=0;i<height;i++)
+    {
+        for (int j=0;j<width;j++)
+        {
+            fprintf(outfile,"%d %d %d  ",b[i][j],r[i][j],g[i][j]);
+        }
+        fprintf(outfile,"\n");
+    }
+    fclose(outfile);
+}
 #ifdef WIN32
 void Picture::Paint(HDC hdc,int ws=0,int hs=0)
 {
