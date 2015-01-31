@@ -11,11 +11,13 @@ private:
     int *b[maxw],*r[maxw],*g[maxw];
 public:
     Picture();
-    Picture(Picture& picb);
-    void Init(Picture &picb);
+    Picture(const Picture& picb);
+    void Init(const Picture &picb);
     void AttachFromFile(const char * file_name);
     void PrintIntoFile(const char * file_name);
+#ifdef WIN32
     void Paint(HDC hdc,int ws,int hs);
+#endif
     void GaussianBlur(int step);
     void ContrastIncrease();
     int GetHeight();
@@ -25,6 +27,6 @@ public:
     void OnlyRed();
     void OnlyBlue();
     void OnlyGreen();
-    void operator = (Picture &picb);
+    void operator = (const Picture &picb);
 };
 #endif
