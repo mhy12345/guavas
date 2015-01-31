@@ -10,11 +10,11 @@ Picture::Picture()
         g[i]=brg[2][i];
     }
 }
-Picture::Picture(Picture &picb)
+Picture::Picture(const Picture &picb)
 {
     Init(picb);
 }
-void Picture::Init(Picture &picb)
+void Picture::Init(const Picture &picb)
 {
     memcpy(this,&picb,sizeof(picb));
     for (int i=0; i<maxw; i++)
@@ -182,7 +182,7 @@ void Picture::OnlyRed()
         }
     }
 }
-void Picture::operator = (Picture &picd)
+void Picture::operator = (const Picture &picd)
 {
     Init(picd);
 }
