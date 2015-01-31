@@ -16,15 +16,15 @@ public:
     ~Picture();
     void Init(const Picture &picb);
     void AttachFromFile(const char * file_name);
-    void PrintIntoFile(const char * file_name);
+    void PrintIntoFile(const char * file_name)const;
 #ifdef WIN32
-    void Paint(HDC hdc,int ws,int hs);
+    void Paint(HDC hdc,int ws,int hs)const;
 #endif
     void GaussianBlur(int step);
     void ContrastIncrease();
-    int GetHeight();
-    int GetWidth();
-    int GetPixel(int x,int y);
+    int GetHeight()const;
+    int GetWidth()const;
+    int GetPixel(int x,int y)const;
     void SetPixel(int x,int y,int rgbval);
     void OnlyRed();
     void OnlyBlue();
