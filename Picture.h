@@ -24,6 +24,8 @@ public:
     void ContrastIncrease();
     int GetHeight()const;
     int GetWidth()const;
+    void SetHeight(int);
+    void SetWidth(int);
     int GetPixel(int x,int y)const;
     void SetPixel(int x,int y,int rgbval);
     void OnlyRed();

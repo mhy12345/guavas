@@ -166,10 +166,16 @@ int Picture::GetWidth()const
 {
     return width;
 }
+int Picture::SetHeight(int hn)
+{
+	height=hn;
+}
+int Picture::SetWidth(int wn)
+{
+	width=wn;
+}
 int Picture::GetHeight()const
 {
-    return height;
-}
 int Picture::GetPixel(int x,int y)const
 {
     return (r[x][y]<<16)+(g[x][y]<<8)+b[x][y];
