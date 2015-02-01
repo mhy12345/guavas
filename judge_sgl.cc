@@ -30,7 +30,7 @@ void JudgeSingle :: init() {
 	rd = pos_t(0, 0);
 	for (int i = 0; i < hei; ++ i)
 		for (int j = 0; j < wid; ++ j)
-			if (obj. GetPixel(i, j) != RGB(255, 255, 255)) {
+			if (isItem(obj. GetPixel(i, j))) {
 				++ tot;
 				xtot += i;
 				ytot += j;
@@ -50,8 +50,10 @@ void JudgeSingle :: init() {
 	sr = 0;
 	for (int i = 0; i < hei; ++ i)
 		for (int j = 0; j < wid; ++ j)
-			if (obj. GetPixel(i, j))
-				sr = max((double)sr, dist(i, j, cog. x, cog. y));
+			if (isItem(obj. GetPixel(i, j))) {
+				upmax(sr, dist(i, j, cog. x, cog. y));
+			}
+	maxr = sqrt(sr);
 }
 
 Picture debo;
@@ -64,7 +66,8 @@ JudgeReturn JudgeSingle :: judge(const Picture& x) {
 	return JudgeReturn('u', rand());
 }
 
-void JudgeSingle :: test(const Picture& x, char* outputFileName) {
+void JudgeSingle :: test(const Picture& x, char* outputFileName, int task) {
+	puts(outputFileName);
 	obj = x;
 	this-> init();
 
@@ -81,14 +84,47 @@ void JudgeSingle :: test(const Picture& x, char* outputFileName) {
 
 	memset(f, 0, sizeof(f));
 
-	for (int rt = 1; rt * cir0 <= 1; ++ rt) {
+	if (task == 1) {
+		debo. SetHeight(hei * 10);
+		debo. SetWidth(wid * 10);
+		for (int i = 0; i < 10; ++ i)
+			for (int j = 0; j < 10; ++ j)
+				debo. SetPixel(cog. x * 10 + i, cog. y * 10 + j, def_colors[0]);
+	}
+
+	for (int rt = 0; rt * cir0 <= 1; ++ rt) {
 		double r(rt * cir0);
 		for (int x = lu. x; x <= rd. x; ++ x)
-			for (int y = lu. y; y <= rd. y; ++ y) {
-				//printf("%.3lf\n", fabs(sqr(x - cog. x) + sqr((y - cog. y) * ort) - sqr(r)));
-				if (fabs(sqr(x - cog. x) + sqr((y - cog. y) * ort) - sqr(r * (rd. x - cog. x))) < linew * r)
-					debo. SetPixel(x, y, RGB(0, 255, 0));
-			}
+			for (int y = lu. y; y <= rd. y; ++ y)
+				if (isItem(obj. GetPixel(x, y)))
+					if (fabs(sqr(x - cog. x) + sqr(y - cog. y) - sqr(r * maxr)) < linew * r) {
+						double tht(asin(((double)y - cog. y) / (r * maxr)) + PI / 2.0);
+						if (x < cog. x || (x == cog. x && y > cog. y)) 
+							tht += PI;
+						int fpos(tht / (PI * 2.0) * funclen);
+						if (fpos >= funclen)
+							fpos = funclen - 1;
+						else if (fpos < 0)
+							fpos = 0;
+						++ f[rt][fpos];
+						if (task == 1) {
+							for (int i = 0; i < 10; ++ i)
+								for (int j = 0; j < 10; ++ j)
+									debo. SetPixel(x * 10 + i, y * 10 + j, def_colors[rt]);
+						}
+					}
+	}
+
+	if (task == 2) {
+		debo. SetWidth(funclen * 5);
+		debo. SetHeight(210);
+		for (int c = 0; c <= 4; ++ c) {
+			for (int i = 0; i < funclen; ++ i)
+				if (f[c][i])
+					for (int j = 0; j < 5; ++ j)
+						for (int k = -1; k < 1; ++ k)
+							debo. SetPixel(max(0, 200 + k - 20 * (c + 1)), i * 5 + j, def_colors[c]);
+		}
 	}
 
 	debo. PrintIntoFile(outputFileName);
