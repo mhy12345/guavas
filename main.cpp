@@ -93,8 +93,15 @@ LRESULT CALLBACK WindowProcedure (HWND hwnd, UINT message, WPARAM wParam, LPARAM
         Pic[0].Paint(hdc,0,0);
         Pic[1].Init(Pic[0]);
         printf("Cmp_status:%d\n",memcmp(&Pic[0],&Pic[1],sizeof(Pic[1])));
-        Pic[1].GaussianBlur(2);
+        Pic[1].GaussianBlur(1);
         Pic[1].Paint(hdc,0,1);
+        Pic[2].Init(Pic[1]);
+        Pic[2].BandW();
+        Pic[2].PrintIntoFile("res.ppm");
+        Pic[2].Paint(hdc,0,2);
+        Pic[3].Init(Pic[2]);
+        Pic[3].FillWord();
+        Pic[3].Paint(hdc,1,0);
         EndPaint(hwnd,&ps);
         break;
     case WM_KEYDOWN:

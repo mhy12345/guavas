@@ -16,7 +16,7 @@ const int maxpic=10;
 double Gaussian_Distribution_h(double x);
 double Gaussian_Distribution_g(double x);
 double Gaussian_Distribution_f(double x);
-
+int RGBdiff(int x,int y);
 #ifdef WIN32
 #include <windows.h>
 #else

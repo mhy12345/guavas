@@ -1,0 +1,21 @@
+# depslib dependency file v1.0
+1422866730 source:e:\project\guavas\main.cpp
+	<tchar.h>
+	<windows.h>
+	"Picture.h"
+
+1423321426 e:\project\guavas\picture.h
+	"stdafx.h"
+
+1422805539 e:\project\guavas\stdafx.h
+	<bits/stdc++.h>
+	<windows.h>
+	<unistd.h>
+
+1422805539 source:e:\project\guavas\stdafx.cpp
+	"stdafx.h"
+
+1423322290 source:e:\project\guavas\picture.cpp
+	"stdafx.h"
+	"Picture.h"
+
