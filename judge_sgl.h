@@ -26,10 +26,11 @@ class JudgeSingle {
 		pos_t lu, rd;	//	Corners of number
 		double ort;	//	Ratio of height and width
 		int hei, wid;	//	object's height and width
-		void init();	//	load args from object
 	public:
-		JudgeReturn judge(const Picture& x);
-		void test(const Picture& x, char* outputFileName, int task);
+		void init(const Picture&);	//	load args from object
+		void makeCircles(int, char*);	//	circle the picture
+		void makeData(char*);
+		JudgeReturn judge();
 		//	task: 1-Draw digits with circles; 2-Draw f(x) graph
 };
 
@@ -48,8 +49,18 @@ class JudgeSingle {
 #define isItem(_x_) ((_x_)!=RGB(255,255,255))
 
 const double cir0 = 0.25;
-const double linew = 25;
-const int funclen = 100;
-const int def_colors[] = {RGB(255, 0, 0), RGB(0, 255, 255), RGB(255, 0, 0), RGB(255, 255, 0), RGB(255, 255, 255)};
+const double linew = 45;
+const int funclen = 13;
+const int guesslen = 0;
+const int def_colors[] = {
+	RGB(255, 0, 0),
+	RGB(0, 255, 255),
+	RGB(255, 0, 0),
+	RGB(255, 255, 0),
+	RGB(255, 255, 255),
+	RGB(0, 0, 255)
+};
+
+void initFuncDef(char*);
 
 #endif
