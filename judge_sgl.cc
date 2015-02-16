@@ -15,13 +15,13 @@ Position :: Position(int x0, int y0) {
 	x = x0, y = y0;
 }
 
-int f[5][funclen];
-int funcdef[10][5][funclen];
+double f[5][funclen];
+double funcdef[10][5][funclen];
 void initFuncDef(char* fileName) {
 	FILE* ipf = fopen(fileName, "rb");
 	for (int i = 0; i < 10; ++ i)
 		for (int j = 0; j <= 4; ++ j)
-			fread(funcdef[i][j], sizeof(int), funclen, ipf);
+			fread(funcdef[i][j], sizeof(double), funclen, ipf);
 	fclose(ipf);
 }
 
@@ -85,7 +85,9 @@ JudgeReturn JudgeSingle :: judge() {
 }
 
 void JudgeSingle :: makeCircles(int task, char* outputFileName) {
+	static int cnt[5][funclen];
 	memset(f, 0, sizeof(f));
+	memset(cnt, 0, sizeof(cnt));
 	Picture* debo;
 	if (task == 1 || task == 2)
 		debo = new Picture;
@@ -96,13 +98,14 @@ void JudgeSingle :: makeCircles(int task, char* outputFileName) {
 			for (int j = 0; j < 10; ++ j)
 				debo-> SetPixel(cog. x * 10 + i, cog. y * 10 + j, def_colors[5]);
 	}
-	for (int rt = 1; rt * cir0 <= 1; ++ rt) {
+	for (int rt = 1; rt <= 4; ++ rt) {
 		double r(rt * cir0);
 		for (int x = lu. x; x <= rd. x; ++ x)
 			for (int y = lu. y; y <= rd. y; ++ y)
-				if (isItem(obj. GetPixel(x, y)) && fabs(sqr(x - cog. x) + sqr(y - cog. y) - sqr(r * maxr)) < linew * r) {
+				if (fabs(sqr(x - cog. x) + sqr(y - cog. y) - sqr(r * maxr)) < linew * r) {
 					double tht(atan2(y - cog. y, x - cog. x) + PI);
 					int fpos(tht / (PI * 2.0) * funclen - 1e-7);
+					int isi(isItem(obj. GetPixel(x, y)));
 					if (fpos >= funclen) {
 						fpos = funclen - 1;
 					}
@@ -113,7 +116,8 @@ void JudgeSingle :: makeCircles(int task, char* outputFileName) {
 						int q((i + fpos + funclen) % funclen);
 						if (task == 3)
 							q = fpos;
-						f[rt][q] += sqr(guesslen - abs(i) + 1);
+						cnt[rt][q] += sqr(guesslen - abs(i) + 1);
+						f[rt][q] += sqr(guesslen - abs(i) + 1) * isi;
 					}
 					if (task == 1) {
 						for (int i = 0; i < 10; ++ i)
@@ -122,6 +126,9 @@ void JudgeSingle :: makeCircles(int task, char* outputFileName) {
 					}
 				}
 	}
+	for (int i = 1; i <= 4; ++ i)
+		for (int j = 0; j < funclen; ++ j)
+			f[i][j] /= (double)cnt[i][j] + 1e-8;
 	if (task == 1)
 		debo-> PrintIntoFile(outputFileName);
 	else if (task == 2) {
@@ -141,9 +148,8 @@ void JudgeSingle :: makeCircles(int task, char* outputFileName) {
 		delete debo;
 }
 
-
 void JudgeSingle :: makeData(char *listFileName) {
-	static int cnt[10][4][funclen];
+	static int cnt[10][5][funclen];
 	FILE* opf = fopen("indicatingdata", "wb");
 	FILE* listf = fopen(listFileName, "r");
 	char fileName[109];
@@ -175,9 +181,10 @@ void JudgeSingle :: makeData(char *listFileName) {
 	for (int i = 0; i < 10; ++ i) {
 		for (int j = 0; j <= 4; ++ j) {
 			for (int k = 0; k < funclen; ++ k)
-				f[j][k] = round((double)funcdef[i][j][k] / (cnt[i][j][k] + 1));
-			fwrite(f[j], sizeof(int), funclen, opf);
+				f[j][k] = funcdef[i][j][k] / (cnt[i][j][k] + 1e-8);
+			fwrite(f[j], sizeof(double), funclen, opf);
 		}
 	}
 	fclose(opf);
 }
+
