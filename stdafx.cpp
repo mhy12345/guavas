@@ -12,3 +12,9 @@ double Gaussian_Distribution_h(double x)
 {
     return Gaussian_Distribution_g((x-128)/128)*815.4343586563920+128;
 }
+int RGBdiff(int x,int y)
+{
+    return abs((x>>16)-(y>>16))
+            +abs((x&0x00ff00>>8)-(y&0x00ff00>>8))
+            +abs((x&0x0000ff)-(y&0x0000ff));
+}

@@ -66,9 +66,9 @@ void Picture::PrintIntoFile(const char * file_name)const
     fprintf(outfile,"%s",note);
     fprintf(outfile,"%d %d\n",width,height);
     fprintf(outfile,"255\n");
-    for (int i=0;i<height;i++)
+    for (int i=0; i<height; i++)
     {
-        for (int j=0;j<width;j++)
+        for (int j=0; j<width; j++)
         {
             fprintf(outfile,"%d %d %d  ",r[i][j],g[i][j],b[i][j]);
         }
@@ -76,8 +76,20 @@ void Picture::PrintIntoFile(const char * file_name)const
     }
     fclose(outfile);
 }
+void Picture::PrintPicture(FILE *outfile)const
+{
+    for (int i=0; i<height; i++)
+    {
+        for (int j=0; j<width; j++)
+        {
+            fprintf(outfile,"[%d,%d,%d]\n",r[i][j],g[i][j],b[i][j]);
+        }
+        fprintf(outfile,"\n");
+    }
+}
+
 #ifdef WIN32
-void Picture::Paint(HDC hdc,int ws=0,int hs=0)const
+void Picture::Paint(HDC hdc,int hs=0,int ws=0)const
 {
     ws=10+((width+10)*ws);
     hs=10+((height+10)*hs);
@@ -90,6 +102,7 @@ void Picture::Paint(HDC hdc,int ws=0,int hs=0)const
     }
 }
 #endif
+
 void Picture::GaussianBlur(int mxstep)
 {
     vector<int> vec;
@@ -168,15 +181,16 @@ int Picture::GetWidth()const
 }
 int Picture::GetHeight()const
 {
-	return height;
+    return height;
 }
-void Picture::SetHeight(int hn)
+
+void Picture::SetHeight(int nh)
 {
-	height=hn;
+    this->height=nh;
 }
-void Picture::SetWidth(int wn)
+void Picture::SetWidth(int nw)
 {
-	width=wn;
+    this->width=nw;
 }
 int Picture::GetPixel(int x,int y)const
 {
@@ -189,6 +203,14 @@ void Picture::SetPixel(int x,int y,int rgbval)
     g[x][y]=rgbval>>8;
     rgbval-=g[x][y]<<8;
     b[x][y]=rgbval;
+}
+bool Picture::IsWhite(int x,int y)const
+{
+    return r[x][y]+g[x][y]+b[x][y]>240*3;
+}
+bool Picture::IsBlack(int x,int y)const
+{
+    return r[x][y]+g[x][y]+b[x][y]<15*3;
 }
 void Picture::OnlyGreen()
 {
@@ -223,4 +245,143 @@ void Picture::OnlyRed()
 void Picture::operator = (const Picture &picd)
 {
     Init(picd);
+}
+void Picture::FillWord(int col)
+{
+    const int cdiff=20;
+    int *qx=new int[maxw*maxh];
+    int *qy=new int[maxw*maxh];
+    int *vis=new int[maxw*maxh];
+    int *nrgb=new int[maxw*maxh];
+    int *bdis=new int[maxw*maxh];
+    memset(vis,0,sizeof(int)*maxw*maxh);
+    memset(bdis,-1,sizeof(int)*maxw*maxh);
+    int head=-1,tail=0;
+    int cst;
+    int bfstime=0;
+    for (int i=0; i<height; i++)
+    {
+        for (int j=0; j<width; j++)
+        {
+            if (IsWhite(i,j))
+            {
+                head=-1,tail=0;
+                qx[0]=i,qy[0]=j;
+                vis[i*maxw+j]=++bfstime;
+                int x,y;
+                while (head<tail)
+                {
+                    x=qx[++head],y=qy[head];
+                    for (int k=0; k<4; k++)
+                    {
+                        x+=mov[k][0],y+=mov[k][1];
+                        if (x>=0 && x<height && y>=0 && y<width && vis[x*maxw+y]!=bfstime)
+                        {
+                            if (IsBlack(x,y))
+                            {
+                                bdis[i*maxw+j]=abs(x-i)+abs(y-j);
+                                break;
+                            }
+                            vis[x*maxw+y]=bfstime;
+                            qx[++tail]=x;
+                            qy[tail]=y;
+                        }
+                        x-=mov[k][0],y-=mov[k][1];
+                    }
+                }
+      //          printf("BlackDis[%d,%d]:%d\n",i,j,bdis[i*maxw+j]);
+            }
+        }
+    }
+    memset(vis,0,sizeof(int)*maxw*maxh);
+    //PrintPicture(stdout);
+    for (int i=0; i<height; i++)
+    {
+        for (int j=0; j<width; j++)
+        {
+            if (vis[i*maxw+j])continue;
+            tail=0;
+            head=-1;
+            qx[tail]=i,qy[tail]=j;
+            int x,y;
+            int psum=0;
+            while (head<tail)
+            {
+                ++head;
+                x=qx[head];
+                y=qy[head];
+                psum+=r[x][y]+g[x][y]+b[x][y];
+                cst=GetPixel(x,y);
+                for (int k=0; k<4; k++)
+                {
+                    x+=mov[k][0],y+=mov[k][1];
+                    if (x>=0 && x<height && y>=0 && y<width && !vis[x*maxw+y] && RGBdiff(GetPixel(x,y),cst)<cdiff)
+                    {
+                        tail++;
+                        qx[tail]=x,qy[tail]=y;
+                        vis[x*maxw+y]=true;
+                    }
+                    x-=mov[k][0],y-=mov[k][1];
+                }
+            }
+            printf("Tail Size:%d\n",tail+1);
+            printf("Averange Color:%d\n",psum/(tail+1)/3);
+            bool flag=true;
+            for (int k=0;k<=tail;k++)
+            {
+                if (IsWhite(qx[k],qy[k]) && bdis[qx[k]*maxw+qy[k]]>15)
+                {
+                    flag=false;
+                    break;
+                }
+            }
+            if (tail<width*height*0.01 && psum/(tail+1)/3>200 && flag)
+            {
+                for (int k=0; k<=tail; k++)
+                {
+                    nrgb[qx[k]*maxw+qy[k]]=col;
+                }
+            }
+            else
+            {
+                for (int k=0; k<=tail; k++)
+                {
+                    nrgb[qx[k]*maxw+qy[k]]=GetPixel(qx[k],qy[k]);
+                }
+            }
+        }
+    }
+    for (int i=0; i<height; i++)
+        for (int j=0; j<width; j++)
+            SetPixel(i,j,nrgb[i*maxw+j]);
+    delete[] qx;
+    delete[] qy;
+    delete[] vis;
+}
+void Picture::BandW()
+{
+    for (int i=0; i<height; i++)
+    {
+        for (int j=0; j<width; j++)
+        {
+            if (r[i][j]+g[i][j]+b[i][j]>200*3)
+            {
+                r[i][j]=g[i][j]=b[i][j]=255;
+            }
+            else
+            {
+                r[i][j]=g[i][j]=b[i][j]=0;
+            }
+        }
+    }
+}
+
+void Picture::Contract()
+{
+    for (int i=0; i<height; i++)
+    {
+        for (int j=0; j<width; j++)
+        {
+        }
+    }
 }
