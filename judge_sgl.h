@@ -49,7 +49,7 @@ class JudgeSingle {
 #define isItem(_x_) ((_x_)!=RGB(255,255,255))
 
 const double cir0 = 0.25;
-const double linew = 45;
+const double linew = 355;
 const int funclen = 13;
 const int guesslen = 0;
 const int def_colors[] = {
@@ -58,7 +58,8 @@ const int def_colors[] = {
 	RGB(255, 0, 0),
 	RGB(255, 255, 0),
 	RGB(255, 255, 255),
-	RGB(0, 0, 255)
+	RGB(0, 0, 255),
+	RGB(255, 255, 255)
 };
 
 void initFuncDef(char*);

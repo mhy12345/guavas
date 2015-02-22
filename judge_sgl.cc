@@ -60,10 +60,15 @@ void JudgeSingle :: init(const Picture& x) {
 	maxr = sqrt(sr);
 }
 
+bool cmpSecond(const JudgeReturn& a, const JudgeReturn& b) {
+	return a. second < b. second;
+}
+
 JudgeReturn JudgeSingle :: judge() {
-	JudgeReturn ret(0, 1e10);
+	JudgeReturn ret[10];
 	this-> makeCircles(0, (char*)0);
-	double vx[10][5], sr[10] = {0}, vmx(0);
+	double vx[10][5], sr[10] = {0};
+	int vse(-1);
 	for (int d = 0; d < 10; ++ d) {
 		//printf("%c ", d + 48);
 		for (int i = 1; i <= 4; ++ i) {
@@ -72,16 +77,18 @@ JudgeReturn JudgeSingle :: judge() {
 	//		printf("%8.3lf\t", vx[d][i]);
 		}
 	//	printf("%8.3lf\n", sr[d]);
-		if (sr[d] < ret. second) {
-			vmx = ret. second;
-			ret. first = d + 48;
-			ret. second = sr[d];
-		}
-		else if (sr[d] < vmx)
-			vmx = sr[d];
+		ret[d] = JudgeReturn(d + 48, sr[d]);
 	}
-	ret. second /= vmx;
-	return ret;
+	sort(ret, ret + 10, cmpSecond);
+	double rat(ret[0]. second / ret[1]. second);
+	if (rat >= 0.9) {
+		for (int i = 0; i < 10; ++ i)
+			printf("\33[31m%3c: \33[32m%5.3lf", ret[i]. first, ret[i]. second);
+		printf("\33[0m");
+		putchar(10);
+	}
+	ret[0]. second /= ret[1]. second;
+	return ret[0];
 }
 
 void JudgeSingle :: makeCircles(int task, char* outputFileName) {
@@ -89,14 +96,25 @@ void JudgeSingle :: makeCircles(int task, char* outputFileName) {
 	memset(f, 0, sizeof(f));
 	memset(cnt, 0, sizeof(cnt));
 	Picture* debo;
-	if (task == 1 || task == 2)
+	if (task == 1 || task == 2 || task == 3)
 		debo = new Picture;
 	if (task == 1) {
-		debo-> SetHeight(hei * 10);
-		debo-> SetWidth(wid * 10);
-		for (int i = 0; i < 10; ++ i)
-			for (int j = 0; j < 10; ++ j)
-				debo-> SetPixel(cog. x * 10 + i, cog. y * 10 + j, def_colors[5]);
+		debo-> SetHeight(hei);
+		debo-> SetWidth(wid);
+		for (int i = 0; i < hei; ++ i)
+			for (int j = 0; j < wid; ++ j)
+				debo-> SetPixel(i, j, def_colors[6]);
+		for (int i = cog. x - 3; i <= cog. x + 3; ++ i)
+			for (int j = cog. y - 3; j <= cog. y + 3; ++ j)
+				debo-> SetPixel(i, j, def_colors[5]);
+	}
+	if (task == 3) {
+		*debo = obj;
+		for (int i = cog. x - 3; i <= cog. x + 3; ++ i)
+			for (int j = cog. y - 3; j <= cog. y + 3; ++ j)
+				debo-> SetPixel(i, j, def_colors[0]);
+		debo-> PrintIntoFile(outputFileName);
+		return;
 	}
 	for (int rt = 1; rt <= 4; ++ rt) {
 		double r(rt * cir0);
@@ -120,9 +138,8 @@ void JudgeSingle :: makeCircles(int task, char* outputFileName) {
 						f[rt][q] += sqr(guesslen - abs(i) + 1) * isi;
 					}
 					if (task == 1) {
-						for (int i = 0; i < 10; ++ i)
-							for (int j = 0; j < 10; ++ j)
-								debo-> SetPixel(x * 10 + i, y * 10 + j, def_colors[rt]);
+						if (isi)
+							debo-> SetPixel(x, y, def_colors[rt]);
 					}
 				}
 	}
@@ -166,16 +183,18 @@ void JudgeSingle :: makeData(char *listFileName) {
 			}
 		if (d == -1)
 			continue;
+		printf("Learning from %s\t", fileName);
 		Picture *pic = new Picture;
 		pic-> AttachFromFile(fileName);
 		this-> init(*pic);
-		this-> makeCircles(3, (char*)0);
+		this-> makeCircles(0, (char*)0);
 		for (int i = 0; i <= 4; ++ i)
 			for (int j = 0; j < funclen; ++ j) {
 				++ cnt[d][i][j];
 				funcdef[d][i][j] += f[i][j];
 			}
 		delete pic;
+		printf("Done\n");
 	}
 	fclose(listf);
 	for (int i = 0; i < 10; ++ i) {
